@@ -60,6 +60,9 @@ lookup['properties'] = {
     },
     'EOM': {
         'sym': 'EOM[A-Z]+ transition [0-9]+/([0-9ABgu\'\"]+)'
+    },
+    'GEOM': {
+        'entry':'[0-9]+\s+([A-Z][a-z]*)\s+([-.0-9]+)\s+([-.0-9]+)\s+([-.0-9]+)'
     }
 }
 #add EOM
@@ -129,5 +132,9 @@ lookup['sections'] = {
     'EOM': {
         'start': '<FULL>M|2 \'N; /EOMEE transition [0-9/A-Za-z]+/{=}\'',
         'end': 'Summary of significant orbitals\:'
+    },
+    'GEOM': {
+        'start':'<FULL>P|2 \'/Standard Nuclear Orientation/{=}\'',
+        'end':lookup['generic_delim']['gen']
     }
 }
