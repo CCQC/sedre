@@ -5,14 +5,14 @@
 
 
 import sedre
-#import oss
-#import dawgspec as ds
+import oss
+import dawgspec as ds
 
 
 # In[18]:
 
 
-pglib = {'C2v':{'A1':[1,1,1,1],'A2':[1,1,-1,-1],'B1':[1,-1,1,-1], 'B2':[1,-1,-1,1]}, 'Cs':{'A\'':[1,1],'A\"':[1,-1]},'C3v':{'A1':[1,1,1],'A2':[1,1,-1],'E':[2,-1,0]},'Ci':{'Ag':[1,1],'Au':[1,-1]}, 'D2h':{'Ag':[1,1,1,1,1,1,1,1],'B1g':[1,1,-1,-1,1,1,-1,-1],'B2g':[1,-1,1,-1,1,-1,1,-1],'B3g':[1,-1,-1,1,1,-1,-1,1],'Au':[1,1,1,1,-1,-1,-1,-1],'B1u':[1,1,-1,-1,-1,-1,1,1],'B2u':[1,-1,1,-1,-1,1,-1,1],'B3u':[1,-1,-1,1,-1,1,1,-1]}}
+pglib = {'C2v':{'A1':[1,1,1,1],'A2':[1,1,-1,-1],'B1':[1,-1,1,-1], 'B2':[1,-1,-1,1],'class_dimensionality':[1,1,1,1]}, 'Cs':{'A\'':[1,1],'A\"':[1,-1],'class_dimensionality':[1,1]},'C3v':{'A1':[1,1,1],'A2':[1,1,-1],'E':[2,-1,0]},'Ci':{'Ag':[1,1],'Au':[1,-1],'class_dimensionality':[1,2,3]}, 'D2h':{'Ag':[1,1,1,1,1,1,1,1],'B1g':[1,1,-1,-1,1,1,-1,-1],'B2g':[1,-1,1,-1,1,-1,1,-1],'B3g':[1,-1,-1,1,1,-1,-1,1],'Au':[1,1,1,1,-1,-1,-1,-1],'B1u':[1,1,-1,-1,-1,-1,1,1],'B2u':[1,-1,1,-1,-1,1,-1,1],'B3u':[1,-1,-1,1,-1,1,1,-1],'class_dimensionality':[1,1,1,1,1,1,1,1]},'D3d':{'A1g':[1,1,1,1,1,1],'A2g':[1,1,-1,1,1,-1],'Eg':[2,-1,0,2,-1,0],'A1u':[1,1,1,-1,-1,-1],'A2u':[1,1,-1,-1,-1,1],'Eu':[2,-1,0,-2,1,0],'class_dimensionality':[1,2,3,1,2,3]}}
 
 
 # In[19]:
@@ -21,7 +21,6 @@ pglib = {'C2v':{'A1':[1,1,1,1],'A2':[1,1,-1,-1],'B1':[1,-1,1,-1], 'B2':[1,-1,-1,
 def dotinto(pg, irrep_1, irrep_2):
     #dots two irreps from a given point group and returns the corresponding irrep
     dotprod = []
-    c=0
     for i in range(len(pglib[pg][irrep_1])):
         dotprod.append(pglib[pg][irrep_1][i]*pglib[pg][irrep_2][i])
     for key in pglib[pg]:
@@ -31,7 +30,28 @@ def dotinto(pg, irrep_1, irrep_2):
     if c == 0:
         return '--'
         
-    
+def reduction_formula(pg,irrep_1,irrep_2):
+    step_1 = []
+    rerep = []
+    keys = list(sedre.pglib[pg].keys())
+    no_irrep_list = []
+    string = []
+    for i in range(len(sedre.pglib[pg][irrep_1])):
+        rerep.append(sedre.pglib[pg][irrep_1][i]*sedre.pglib[pg][irrep_2][i])
+    for i in range(len(rerep)):
+        step_1.append(rerep[i]*sedre.pglib[pg]['class_dimensionality'][i])
+    for i in range(len(sedre.pglib[pg])-1):
+        counter = 0
+        for ii in range(len(step_1)):
+            counter += step_1[ii]*sedre.pglib[pg][keys[i]][ii]
+        total = counter/sum(sedre.pglib[pg]['class_dimensionality'])
+        no_irrep_list.append(int(total))
+    for i in range(len(no_irrep_list)):
+        if int(no_irrep_list[i])==1:
+            string.append(str(keys[i]))
+        elif no_irrep_list[i]>1:
+            string.append(str(no_irrep_list[i])+' ' +keys[i])
+    return ' + '.join(string)   
 
 
 # In[ ]:
@@ -160,7 +180,7 @@ def return_trans_sym(file = 'output.dat'):
         for i in range(len(lst4)):
             lst4[i].append(all_orb_sym[int(lst4[i][0])-1])
             lst4[i].append(all_orb_sym[int(lst4[i][1])-1])
-            lst4[i].append(sedre.dotinto(pg,lst4[i][2],lst4[i][3]))
+            lst4[i].append(sedre.reduction_formula(pg,lst4[i][2],lst4[i][3]))
             property_list.append(lst4[i][4])
         return property_list
 
